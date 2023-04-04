@@ -152,6 +152,7 @@ interface AnnotatorState {
 
   /* Video Inference data */
   videoInferenceData: any;
+  isGraphView: boolean;
 }
 
 /**
@@ -250,6 +251,8 @@ export default class Annotator extends Component<
         },
       },
       currAnnotationPlaybackId: 0,
+      videoInferenceData: {},
+      isGraphView: false,
     };
 
     this.toaster = new Toaster({}, {});
@@ -1623,7 +1626,11 @@ export default class Annotator extends Component<
               <div id="annotation-map" className={"style-annotator"} />
               {(this.currentAsset.type === 'video' && this.backgroundImg) ? (
                 <div className="toggle-graph-button">
-                      <Button icon='timeline-line-chart'/>
+                      <Button icon='timeline-line-chart' onClick={()=>{
+                        this.setState({
+                          isGraphView: !this.state.isGraphView
+                        })
+                      }}/>
                   </div>
               ) : null}
               {this.backgroundImg ? (
