@@ -251,7 +251,7 @@ export default class Annotator extends Component<
         },
       },
       currAnnotationPlaybackId: 0,
-      videoInferenceData: {},
+      videoInferenceData: null,
       isGraphView: false,
     };
 
@@ -1547,14 +1547,12 @@ export default class Annotator extends Component<
     /* Prefix for Dynamic Styling of Collapsing Image List */
     const collapsedButtonTheme = this.props.useDarkTheme ? "" : "light-";
     const isCollapsed = this.state.imageListCollapsed ? "collapsed-" : "";
+    const isGraphView = this.state.isGraphView ? " graph-view" : "";
 
     /* Filter currently visible assets based on current settings */
     const visibleAssets = this.state.assetList.filter(() =>
       this.isAssetVisible()
     );
-
-    // console.log(this.videoOverlay?.getElement())
-    console.log(this.state.videoInferenceData);
 
     return (
       <div>
@@ -1562,7 +1560,9 @@ export default class Annotator extends Component<
         <div className={"workspace"}>
           {/* Appends Styling Prefix if Image List is Collapsed */}
           <div
-            className={[isCollapsed, "image-list"].join("")}
+            className={
+                [isCollapsed, "image-list", isGraphView].join("")
+            }
             id={"image-list"}
           >
             <Button
@@ -1584,8 +1584,15 @@ export default class Annotator extends Component<
             <Card
               className={[isCollapsed, "image-bar"].join("")}
               id={"image-bar"}
-            >
-              {/* <AnalyticsBar confidence={}/> */}
+            > 
+            { 
+            this.state.isGraphView ?
+              <AnalyticsBar 
+                confidence={this.state.confidence} 
+                videoInferenceData={this.state.videoInferenceData} 
+                videoElement={this.videoOverlay.getElement()}
+                tags={Object.keys(this.state.tagInfo.tags)}
+              /> :
               <ImageBar
                 ref={ref => {
                   this.imagebarRef = ref;
@@ -1595,6 +1602,7 @@ export default class Annotator extends Component<
                 callbacks={{ selectAssetCallback: this.selectAsset }}
                 {...this.props}
               />
+            }
             </Card>
           </div>
 
@@ -1624,7 +1632,7 @@ export default class Annotator extends Component<
             {/* End Non-Ideal State Render */}
             <Card className={"main-annotator"}>
               <div id="annotation-map" className={"style-annotator"} />
-              {(this.currentAsset.type === 'video' && this.backgroundImg) ? (
+              {(this.state.videoInferenceData && this.currentAsset.type === 'video' && this.backgroundImg) ? (
                 <div className="toggle-graph-button">
                       <Button icon='timeline-line-chart' onClick={()=>{
                         this.setState({

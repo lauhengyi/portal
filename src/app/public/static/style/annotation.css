@@ -25,6 +25,11 @@
   padding-bottom: 10px;
 }
 
+.image-list.graph-view{
+  height: 600px;
+  top: calc(100% - 540px);
+}
+
 .annotator-space {
   width: calc(100% - 190px);
   height: calc(100% - 150px);
@@ -406,4 +411,9 @@
 
 :focus:not(button, input) {
   outline: none !important;
+}
+
+.chart-container {
+  width: 100%;
+  display: block;
 }
