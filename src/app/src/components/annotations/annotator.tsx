@@ -44,6 +44,7 @@ import { CreateGenericToast } from "@portal/utils/ui/toasts";
 import AnnotatorInstanceSingleton from "./utils/annotator.singleton";
 import AnnotationMenu from "./menu";
 import ImageBar from "./imagebar";
+import AnalyticsBar from "./analyticsBar";
 import SettingsModal from "./settingsmodal";
 import FileModal from "./filemodal";
 import AnnotatorSettings from "./utils/annotatorsettings";
@@ -148,6 +149,9 @@ interface AnnotatorState {
     opacity: number;
   };
   currAnnotationPlaybackId: number;
+
+  /* Video Inference data */
+  videoInferenceData: any;
 }
 
 /**
@@ -787,6 +791,7 @@ export default class Annotator extends Component<
       )
         .then(response => {
           if (this.currentAsset.url === asset.url && singleAnalysis) {
+            this.setState({videoInferenceData: response.data})
             const videoElement = this.videoOverlay.getElement();
             /**
              * Recursive Callback function that
@@ -1545,6 +1550,9 @@ export default class Annotator extends Component<
       this.isAssetVisible()
     );
 
+    // console.log(this.videoOverlay?.getElement())
+    console.log(this.state.videoInferenceData);
+
     return (
       <div>
         <Toaster {...this.state} ref={this.refHandlers.toaster} />
@@ -1574,6 +1582,7 @@ export default class Annotator extends Component<
               className={[isCollapsed, "image-bar"].join("")}
               id={"image-bar"}
             >
+              {/* <AnalyticsBar confidence={}/> */}
               <ImageBar
                 ref={ref => {
                   this.imagebarRef = ref;
@@ -1612,6 +1621,11 @@ export default class Annotator extends Component<
             {/* End Non-Ideal State Render */}
             <Card className={"main-annotator"}>
               <div id="annotation-map" className={"style-annotator"} />
+              {(this.currentAsset.type === 'video' && this.backgroundImg) ? (
+                <div className="toggle-graph-button">
+                      <Button icon='timeline-line-chart'/>
+                  </div>
+              ) : null}
               {this.backgroundImg ? (
                 <div className="annotator-settings-button">
                   <AnnotatorSettings

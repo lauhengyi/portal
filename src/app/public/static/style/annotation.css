@@ -245,6 +245,14 @@
   border: none !important;
 }
 
+.toggle-graph-button {
+  position: absolute;
+  z-index: 100;
+  float: right;
+  left: calc(100% - 80px);
+  top: calc(100% - 40px);
+}
+
 .annotator-settings-button {
   position: absolute;
   z-index: 100;
