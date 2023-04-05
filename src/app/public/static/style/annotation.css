@@ -27,13 +27,17 @@
 
 .image-list.graph-view{
   height: 600px;
-  top: calc(100% - 540px);
+  top: calc(100% - 500px);
 }
 
 .annotator-space {
   width: calc(100% - 190px);
   height: calc(100% - 150px);
   margin-right: 10px;
+}
+
+.annotator-space.graph-view {
+  height: calc(100% - 510px);
 }
 
 .annotator-controls {

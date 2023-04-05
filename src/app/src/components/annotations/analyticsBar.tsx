@@ -6,11 +6,11 @@ interface AnalyticsBarProps {
   confidence: number;
   videoInferenceData: any;
   videoOverlay: L.VideoOverlay;
-  tagsObject: object;
+  tagsObject: Record<string, number>;
 }
 
 const AnalyticsBar = (props: AnalyticsBarProps) => {
-  const { confidence, videoInferenceData, videoOverlay, tagsObject} = props;
+  const { confidence, videoInferenceData, videoOverlay, tagsObject } = props;
   const videoElement = videoOverlay.getElement();
   const tags = Object.keys(tagsObject);
 
@@ -92,7 +92,6 @@ const AnalyticsBar = (props: AnalyticsBarProps) => {
     return allOptions;
   }, [tags]);
 
-
   return (
     <div className="chart-container">
       {tags.map(tag => (
@@ -106,7 +105,7 @@ const AnalyticsBar = (props: AnalyticsBarProps) => {
       ))}
     </div>
   );
-}
+};
 
 //   .filter(
 //     ([annotation, _]) =>

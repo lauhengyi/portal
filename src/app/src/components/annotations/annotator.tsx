@@ -1611,7 +1611,7 @@ export default class Annotator extends Component<
             className={
               this.state.imageListCollapsed
                 ? "expanded-annotator-space"
-                : "annotator-space"
+                : "annotator-space" + isGraphView
             }
           >
             {/* Non-Ideal State Render */}
