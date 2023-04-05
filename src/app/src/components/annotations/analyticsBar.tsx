@@ -1,16 +1,18 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import Chart from "react-apexcharts";
 import { TagColours } from "@portal/constants/annotation";
 
 interface AnalyticsBarProps {
   confidence: number;
   videoInferenceData: any;
-  videoElement: HTMLVideoElement | undefined;
-  tags: string[];
+  videoOverlay: L.VideoOverlay;
+  tagsObject: object;
 }
 
-export default function AnalyticsBar(props: AnalyticsBarProps) {
-  const { confidence, videoInferenceData, videoElement, tags } = props;
+const AnalyticsBar = (props: AnalyticsBarProps) => {
+  const { confidence, videoInferenceData, videoOverlay, tagsObject} = props;
+  const videoElement = videoOverlay.getElement();
+  const tags = Object.keys(tagsObject);
 
   // Building a series
   const currentSeries = useMemo(() => {
@@ -27,61 +29,76 @@ export default function AnalyticsBar(props: AnalyticsBarProps) {
     for (const frame of Object.values(videoInferenceData.frames)) {
       // Count the amount of annotations for each tag in the frame
       for (const annotation of frame) {
-        series[annotation.tag.name][0].data[currentFrame]++;
+        if (annotation.confidence > confidence) {
+          series[annotation.tag.name][0].data[currentFrame]++;
+        }
       }
       currentFrame++;
     }
 
-    console.log(series);
     return series;
-  }, [confidence]);
+  }, [confidence, videoOverlay, videoInferenceData]);
 
-  const allOptions = {};
-  for (let i = 0; i < tags.length; i++) {
-    allOptions[tags[i]] = {
-      title: {
-        text: tags[i],
-        align: "left",
-        margin: 0,
-        offsetY: 20,
-      },
-      chart: {
-        id: tags[i],
-        group: "tags",
-        type: "line",
-        foreColor: "#f5f8fa",
-        parentHeightOffset: 0,
-        toolbar: {
-            offsetY: 20,
-        }
-      },
-      colors: [TagColours[i]],
-      tooltip: {
-        fillSeriesColor: true,
-        y: {
-          formatter: val => {
-            return Math.ceil(val);
-          },
-          format: "blue",
+  const currentOptions = useMemo(() => {
+    const allOptions = {};
+    for (let i = 0; i < tags.length; i++) {
+      allOptions[tags[i]] = {
+        title: {
+          text: tags[i],
+          align: "left",
+          margin: 0,
+          offsetY: 20,
         },
-      },
-      yaxis: {
-        tickAmount: 5,
-        lines: {
+        chart: {
+          id: tags[i],
+          group: "tags",
+          type: "line",
+          foreColor: "#f5f8fa",
+          parentHeightOffset: 0,
+          toolbar: {
+            offsetY: 20,
+          },
+          events: {
+            click: (_, __, config) => {
+              const clickedFrame = config.dataPointIndex;
+              if (videoElement) {
+                videoElement.currentTime =
+                  clickedFrame / videoInferenceData.fps;
+              }
+            },
+          },
+        },
+        colors: [TagColours[i]],
+        tooltip: {
+          fillSeriesColor: true,
+          y: {
+            formatter: val => {
+              return Math.ceil(val);
+            },
+            format: "blue",
+          },
+        },
+        yaxis: {
+          tickAmount: 5,
+          lines: {
             show: false,
-        }
-      },
-      xaxis: {
-      tickAmount: 10,
-      },
-    };
-  }
+          },
+        },
+        xaxis: {
+          tickAmount: 10,
+        },
+      };
+    }
+    return allOptions;
+  }, [tags]);
+
 
   return (
     <div className="chart-container">
       {tags.map(tag => (
         <Chart
-          options={allOptions[tag]}
+          key={tag}
+          options={currentOptions[tag]}
           series={currentSeries[tag]}
           type={"line"}
           height={160}
@@ -105,3 +122,5 @@ export default function AnalyticsBar(props: AnalyticsBarProps) {
 //               .includes(filter.toLowerCase())
 //           ))
 //   )
+
+export default React.memo(AnalyticsBar);

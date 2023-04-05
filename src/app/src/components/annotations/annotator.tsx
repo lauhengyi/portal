@@ -1590,8 +1590,8 @@ export default class Annotator extends Component<
               <AnalyticsBar 
                 confidence={this.state.confidence} 
                 videoInferenceData={this.state.videoInferenceData} 
-                videoElement={this.videoOverlay.getElement()}
-                tags={Object.keys(this.state.tagInfo.tags)}
+                videoOverlay={this.videoOverlay}
+                tagsObject={this.state.tagInfo.tags}
               /> :
               <ImageBar
                 ref={ref => {
