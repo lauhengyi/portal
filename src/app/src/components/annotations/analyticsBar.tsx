@@ -20,6 +20,7 @@ const AnalyticsBar = (props: AnalyticsBarProps) => {
     const series = {};
     for (const tag of tags) {
       series[tag] = [{}];
+      series[tag][0].name = tag;
       series[tag][0].data = Array(
         Object.keys(videoInferenceData.frames).length
       ).fill(0);
@@ -70,13 +71,15 @@ const AnalyticsBar = (props: AnalyticsBarProps) => {
         },
         colors: [TagColours[i]],
         tooltip: {
-          fillSeriesColor: true,
+            fillSeriesColor: true,
           y: {
-            formatter: val => {
-              return Math.ceil(val);
+            title: {
             },
-            format: "blue",
+            formatter: (val) => `${val} annotations`,
           },
+          x: {
+            formatter: (val) => `Frame ${val}`,
+          }
         },
         yaxis: {
           tickAmount: 5,
