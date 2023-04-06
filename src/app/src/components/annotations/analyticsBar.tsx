@@ -73,19 +73,4 @@ const AnalyticsBar = (props: AnalyticsBarProps) => {
   );
 };
 
-//   .filter(
-//     ([annotation, _]) =>
-//       annotation.options.confidence > this.props.confidence &&
-//       /* If no filters selected, should return true. This is to
-//       guard against some returning false on empty arrays */
-//       (this.props.filterArr.length === 0 ||
-//         /* Check if tag is present in filter (CASE-INSENSITIVE) */
-//         this.props.showSelected ===
-//           this.props.filterArr.some(filter =>
-//             this.tagNames[annotation.options.annotationTag]
-//               .toLowerCase()
-//               .includes(filter.toLowerCase())
-//           ))
-//   )
-
 export default React.memo(AnalyticsBar);
