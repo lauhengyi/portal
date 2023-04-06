@@ -9,6 +9,11 @@ interface AnalyticsBarProps {
   tagsObject: Record<string, number>;
 }
 
+interface Series {
+  name: string;
+  data: number[];
+}
+
 const AnalyticsBar = (props: AnalyticsBarProps) => {
   const { confidence, videoInferenceData, videoOverlay, tagsObject } = props;
   const videoElement = videoOverlay.getElement();
@@ -16,13 +21,13 @@ const AnalyticsBar = (props: AnalyticsBarProps) => {
 
   // Building a series
   // Initialize the series with arrays of 0s for each trame
-  const series = {};
-  for (const tag of tags) {
-    series[tag] = [{}];
-    series[tag][0].name = tag;
-    series[tag][0].data = Array(
-      Object.keys(videoInferenceData.frames).length
-    ).fill(0);
+  const seriesArray: Series[] = [];
+  for (let i = 0; i < tags.length; i += 1) {
+    const series = {
+      name: tags[i],
+      data: Array(Object.keys(videoInferenceData.frames).length).fill(0),
+    };
+    seriesArray.push(series);
   }
 
   let currentFrame = 0;
@@ -30,73 +35,64 @@ const AnalyticsBar = (props: AnalyticsBarProps) => {
     // Count the amount of annotations for each tag in the frame
     for (const annotation of frame) {
       if (annotation.confidence > confidence) {
-        series[annotation.tag.name][0].data[currentFrame]++;
+        seriesArray[annotation.tag.id].data[currentFrame]++;
       }
     }
     currentFrame++;
   }
 
-  const allOptions = {};
-  for (let i = 0; i < tags.length; i++) {
-    allOptions[tags[i]] = {
-      title: {
-        text: tags[i],
-        align: "left",
-        margin: 0,
+  const options = {
+    title: {
+      text: 'Annotations per frame',
+      align: "left",
+      margin: 0,
+    },
+    chart: {
+      type: "line",
+      foreColor: "#f5f8fa",
+      parentHeightOffset: 0,
+      toolbar: {
         offsetY: 20,
       },
-      chart: {
-        id: tags[i],
-        group: "tags",
-        type: "line",
-        foreColor: "#f5f8fa",
-        parentHeightOffset: 0,
-        toolbar: {
-          offsetY: 20,
-        },
-        events: {
-          click: (_, __, config) => {
-            const clickedFrame = config.dataPointIndex;
-            if (videoElement) {
-              videoElement.currentTime = clickedFrame / videoInferenceData.fps;
-            }
-          },
+      events: {
+        click: (_, __, config) => {
+          const clickedFrame = config.dataPointIndex;
+          if (videoElement) {
+            videoElement.currentTime = clickedFrame / videoInferenceData.fps;
+          }
         },
       },
-      colors: [TagColours[i]],
-      tooltip: {
-        fillSeriesColor: true,
-        y: {
-          title: {},
-          formatter: val => `${val} annotations`,
-        },
-        x: {
-          formatter: val => `Frame ${val}`,
-        },
+    },
+    colors: TagColours,
+    tooltip: {
+      fillSeriesColor: true,
+      y: {
+        title: {},
+        formatter: val => `${val} annotations`,
       },
-      yaxis: {
-        tickAmount: 5,
-        lines: {
-          show: false,
-        },
+      x: {
+        formatter: val => `Frame ${val}`,
       },
-      xaxis: {
-        tickAmount: 10,
+    },
+    yaxis: {
+      tickAmount: 5,
+      lines: {
+        show: false,
       },
-    };
-  }
+    },
+    xaxis: {
+      tickAmount: 10,
+    },
+  };
 
   return (
     <div className="chart-container">
-      {tags.map(tag => (
-        <Chart
-          key={tag}
-          options={allOptions[tag]}
-          series={series[tag]}
-          type={"line"}
-          height={160}
-        />
-      ))}
+      <Chart
+        options={options}
+        series={seriesArray}
+        type={"line"}
+        height={300}
+      />
     </div>
   );
 };
