@@ -50,6 +50,7 @@ import FileModal from "./filemodal";
 import AnnotatorSettings from "./utils/annotatorsettings";
 import FormatTimerSeconds from "./utils/timer";
 import { RegisteredModel } from "./model";
+import getSeriesArray, { Series } from "./getSeriesArray";
 
 type Point = [number, number];
 type MapType = L.DrawMap;
@@ -151,7 +152,7 @@ interface AnnotatorState {
   currAnnotationPlaybackId: number;
 
   /* Video Inference data */
-  videoInferenceData: any;
+  seriesArray: Series[];
   isGraphView: boolean;
 }
 
@@ -251,7 +252,7 @@ export default class Annotator extends Component<
         },
       },
       currAnnotationPlaybackId: 0,
-      videoInferenceData: null,
+      seriesArray: [],
       isGraphView: false,
     };
 
@@ -794,7 +795,13 @@ export default class Annotator extends Component<
       )
         .then(response => {
           if (this.currentAsset.url === asset.url && singleAnalysis) {
-            this.setState({videoInferenceData: response.data})
+            this.setState({seriesArray: 
+              getSeriesArray(
+                response.data.frames, 
+                Object.keys(this.state.tagInfo.tags), 
+                this.state.confidence
+                )
+              })
             const videoElement = this.videoOverlay.getElement();
             /**
              * Recursive Callback function that
@@ -1588,10 +1595,8 @@ export default class Annotator extends Component<
             { 
             this.state.isGraphView ?
               <AnalyticsBar 
-                confidence={this.state.confidence} 
-                videoInferenceData={this.state.videoInferenceData} 
+                seriesArray ={this.state.seriesArray} 
                 videoOverlay={this.videoOverlay}
-                tagsObject={this.state.tagInfo.tags}
               /> :
               <ImageBar
                 ref={ref => {
@@ -1632,7 +1637,7 @@ export default class Annotator extends Component<
             {/* End Non-Ideal State Render */}
             <Card className={"main-annotator"}>
               <div id="annotation-map" className={"style-annotator"} />
-              {(this.state.videoInferenceData && this.currentAsset.type === 'video' && this.backgroundImg) ? (
+              {(this.state.seriesArray.length && this.currentAsset.type === 'video' && this.backgroundImg) ? (
                 <div className="toggle-graph-button">
                       <Button icon='timeline-line-chart' onClick={()=>{
                         this.setState({

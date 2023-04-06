@@ -1,45 +1,18 @@
-import React, { useEffect, useMemo } from "react";
+import React from "react";
 import Chart from "react-apexcharts";
 import { TagColours } from "@portal/constants/annotation";
+import { Series } from "./getSeriesArray";
+
 
 interface AnalyticsBarProps {
-  confidence: number;
-  videoInferenceData: any;
   videoOverlay: L.VideoOverlay;
-  tagsObject: Record<string, number>;
+  seriesArray: Series[];
 }
 
-interface Series {
-  name: string;
-  data: number[];
-}
 
 const AnalyticsBar = (props: AnalyticsBarProps) => {
-  const { confidence, videoInferenceData, videoOverlay, tagsObject } = props;
+  const {videoOverlay, seriesArray} = props;
   const videoElement = videoOverlay.getElement();
-  const tags = Object.keys(tagsObject);
-
-  // Building a series
-  // Initialize the series with arrays of 0s for each trame
-  const seriesArray: Series[] = [];
-  for (let i = 0; i < tags.length; i += 1) {
-    const series = {
-      name: tags[i],
-      data: Array(Object.keys(videoInferenceData.frames).length).fill(0),
-    };
-    seriesArray.push(series);
-  }
-
-  let currentFrame = 0;
-  for (const frame of Object.values(videoInferenceData.frames)) {
-    // Count the amount of annotations for each tag in the frame
-    for (const annotation of frame) {
-      if (annotation.confidence > confidence) {
-        seriesArray[annotation.tag.id].data[currentFrame]++;
-      }
-    }
-    currentFrame++;
-  }
 
   const options = {
     title: {
