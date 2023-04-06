@@ -153,6 +153,7 @@ interface AnnotatorState {
 
   /* Video Inference data */
   seriesArray: Series[];
+  currentVideoFps: number;
   isGraphView: boolean;
 }
 
@@ -795,12 +796,13 @@ export default class Annotator extends Component<
       )
         .then(response => {
           if (this.currentAsset.url === asset.url && singleAnalysis) {
-            this.setState({seriesArray: 
-              getSeriesArray(
+            this.setState({
+              seriesArray: getSeriesArray(
                 response.data.frames, 
                 Object.keys(this.state.tagInfo.tags), 
                 this.state.confidence
-                )
+                ),
+              currentVideoFps: response.data.fps,
               })
             const videoElement = this.videoOverlay.getElement();
             /**
@@ -1447,6 +1449,15 @@ export default class Annotator extends Component<
     return toastProps;
   }
 
+  handleAnalysisBarClick = (_, __, config: {
+      dataPointIndex: number;
+    }) => {
+      const clickedFrame = config.dataPointIndex;
+      if (this.videoOverlay) {
+        this.videoOverlay.getElement().currentTime = clickedFrame / this.state.currentVideoFps;
+      }
+    };
+
   /* Hotkey for Quick Annotation Selection */
   public renderHotkeys(): JSX.Element {
     return (
@@ -1596,7 +1607,7 @@ export default class Annotator extends Component<
             this.state.isGraphView ?
               <AnalyticsBar 
                 seriesArray ={this.state.seriesArray} 
-                videoOverlay={this.videoOverlay}
+                onClick={this.handleAnalysisBarClick}
               /> :
               <ImageBar
                 ref={ref => {

@@ -3,20 +3,21 @@ import Chart from "react-apexcharts";
 import { TagColours } from "@portal/constants/annotation";
 import { Series } from "./getSeriesArray";
 
-
 interface AnalyticsBarProps {
-  videoOverlay: L.VideoOverlay;
+  onClick: (
+    _: unknown,
+    __: unknown,
+    config: { dataPointIndex: number }
+  ) => void;
   seriesArray: Series[];
 }
 
-
 const AnalyticsBar = (props: AnalyticsBarProps) => {
-  const {videoOverlay, seriesArray} = props;
-  const videoElement = videoOverlay.getElement();
+  const { onClick, seriesArray } = props;
 
   const options = {
     title: {
-      text: 'Annotations per frame',
+      text: "Annotations per frame",
       align: "left",
       margin: 0,
     },
@@ -28,13 +29,8 @@ const AnalyticsBar = (props: AnalyticsBarProps) => {
         offsetY: 20,
       },
       events: {
-        click: (_, __, config) => {
-          const clickedFrame = config.dataPointIndex;
-          if (videoElement) {
-            videoElement.currentTime = clickedFrame / videoInferenceData.fps;
-          }
+        click: onClick
         },
-      },
     },
     colors: TagColours,
     tooltip: {
@@ -42,8 +38,8 @@ const AnalyticsBar = (props: AnalyticsBarProps) => {
       y: {
         title: {},
         formatter: val => {
-            if (!val) return null;
-            return `${val} annotations`;
+          if (!val) return null;
+          return `${val} annotations`;
         },
       },
       x: {
