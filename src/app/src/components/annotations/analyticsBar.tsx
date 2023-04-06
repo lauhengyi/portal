@@ -68,7 +68,10 @@ const AnalyticsBar = (props: AnalyticsBarProps) => {
       fillSeriesColor: true,
       y: {
         title: {},
-        formatter: val => `${val} annotations`,
+        formatter: val => {
+            if (!val) return null;
+            return `${val} annotations`;
+        },
       },
       x: {
         formatter: val => `Frame ${val}`,
@@ -91,7 +94,7 @@ const AnalyticsBar = (props: AnalyticsBarProps) => {
         options={options}
         series={seriesArray}
         type={"line"}
-        height={300}
+        height={450}
       />
     </div>
   );
